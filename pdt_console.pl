@@ -34,5 +34,14 @@
 
 %%	pdt_install_console
 %
-%	Modify    =user_input=    and    =user_output=     to    support
-%	get_single_char/1
+%	Support  get_single_char/1  in  PDT    console.  This  predicate
+%	modifies =user_input= and =user_output= as follows:
+%
+%	  - If single-char mode is enabled, write "ESC s" over the user
+%	    output and then wait for two characters, returning the
+%	    first.
+%	  - Output is changed to emit ESC as ESC ESC.
+%
+%	This protocol was  designed  for  PDT   by  Lukas  Degener.  The
+%	original implementation was partly in Prolog.   This is a full C
+%	implementation, both for speed.

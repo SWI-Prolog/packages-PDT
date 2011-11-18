@@ -73,7 +73,7 @@ free_console(void *input_handle, void *output_handle)
 { pdt_console **pc;
   pdt_console *c;
 
-  for(pc = &consoles; c=*pc; pc = &c->next)
+  for(pc = &consoles; (c=*pc); pc = &c->next)
   { Sclose_function cf = NULL;
 
     c = *pc;

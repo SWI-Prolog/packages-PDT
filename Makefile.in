@@ -1,0 +1,82 @@
+################################################################
+# Makefile template for SWI-Prolog PDT package
+#
+# This template is used by configure to create Makefile.  See
+# the file INSTALL for further installation instructions.
+#
+# License: LGPL
+#
+# Author: Jan Wielemaker (J.Wielemaker@vu.nl)
+################################################################
+
+PACKAGE=pdt
+DOC=pdt
+include ../Makefile.defs
+
+LIBPL=		pdt_console.pl
+TARGETS=	pdt_console.@SO@
+
+PDTOBJ=		pdt_console.o
+
+all:		$(TARGETS)
+
+pdt_console.@SO@:	$(PDTOBJ)
+		$(LD) $(LDSOFLAGS) -o $@ $(PDTOBJ) @LIBS@
+
+install:	$(TARGETS) $(LIBPL)
+		mkdir -p $(DESTDIR)$(SOLIBDIR)
+		for f in $(TARGETS); do \
+		  $(INSTALL_PROGRAM) $$f $(DESTDIR)$(SOLIBDIR); \
+		done
+		mkdir -p $(DESTDIR)$(PLBASE)/library
+		for f in $(LIBPL); do \
+		  $(INSTALL_DATA) $$f $(DESTDIR)$(PLBASE)/library; \
+		done
+		$(MKINDEX)
+
+ln-install::
+		$(MAKE) INSTALL_DATA="../ln-install" INSTALL_PROGRAM="../ln-install" install
+
+rpm-install:	install
+
+html-install::
+		mkdir -p $(DESTDIR)$(PKGDOC)
+		$(INSTALL) -m 644 $(DOC).html $(DESTDIR)$(PKGDOC)
+
+pdf-install::
+		mkdir -p $(DESTDIR)$(PKGDOC)
+		$(INSTALL) -m 644 $(DOC).pdf $(DESTDIR)$(PKGDOC)
+
+uninstall::
+		(cd $(SOLIBDIR) && rm -f $(TARGETS))
+		(cd $(PLBASE)/library && rm -f $(LIBPL))
+		$(MKINDEX)
+
+################################################################
+# Testing
+################################################################
+
+check::
+
+################################################################
+# Documentation
+################################################################
+
+TEXEXTRA=       pdtconsole.tex
+$(TEX):         $(TEXEXTRA)
+
+pdtconsole.tex: pdt_console.pl
+		$(PLTOTEX) --section --out=pdtconsole $<
+
+################################################################
+# Clean
+################################################################
+
+clean:
+		rm -f $(PDTOBJ) *~ *.o *% a.out core config.log
+
+distclean:	clean
+		rm -f $(TARGETS) config.cache config.h config.status Makefile
+		rm -f $(DOC).aux $(DOC).log $(DOC).out $(DOC).toc
+		rm -rf html
+		rm -rf autom4te.cache
