@@ -30,7 +30,7 @@
 :- module(pdt_console,
 	  [ pdt_install_console/0
 	  ]).
-:- use_foreign_library(pdt_console).
+:- use_foreign_library(foreign(pdt_console)).
 
 %%	pdt_install_console
 %
@@ -45,3 +45,8 @@
 %	This protocol was  designed  for  PDT   by  Lukas  Degener.  The
 %	original implementation was partly in Prolog.   This is a full C
 %	implementation, both for speed.
+
+pdt_install_console :-
+	pdt_wrap_console,
+	set_stream(user_input, tty(true)),
+	set_stream(user_output, tty(true)).

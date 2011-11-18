@@ -180,7 +180,7 @@ pdt_close_out(void *handle)
 
 
 static foreign_t
-pdt_install_console()
+pdt_wrap_console()
 { IOSTREAM *in, *out;
 
   if ( (in=Suser_input) && (out=Suser_output) )
@@ -205,5 +205,5 @@ pdt_install_console()
 
 install_t
 install_pdt_console()
-{ PL_register_foreign("pdt_install_console", 0, pdt_install_console, 0);
+{ PL_register_foreign("pdt_wrap_console", 0, pdt_wrap_console, 0);
 }
