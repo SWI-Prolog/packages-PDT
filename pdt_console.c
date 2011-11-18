@@ -99,20 +99,20 @@ free_console(void *input_handle, void *output_handle)
 static ssize_t
 pdt_read(void *handle, char *buf, size_t size)
 { pdt_console *c = find_console(handle, NULL);
+  IOSTREAM *out;
 
-  if ( Suser_input &&
-       Suser_input->handle == c &&
-       PL_ttymode(Suser_input) == PL_RAWTTY )
+  if ( c &&
+       PL_ttymode(Suser_input) == PL_RAWTTY  &&
+       (out = Suser_output) )
   { ssize_t rc;
-    const char *go_single = "\es";
+    static char *go_single = "\es";
 
-    (*c->output_functions.write)(handle, buf, em-buf);
-    Sfprintf(Suser_output, "\es");
-    Sflush(Suser_output);
-    rc = (*c->input_functions.read)(handle, buf, 2);
-    if ( rc == 2 )
-      rc = 1;				/* drop \n */
-    return rc;
+    if ( (*c->output_functions.write)(out->handle, go_single, 2) == 2 )
+    { rc = (*c->input_functions.read)(handle, buf, 2);
+      if ( rc == 2 )
+	rc = 1;				/* drop \n */
+      return rc;
+    }
   }
 
   return (*c->input_functions.read)(handle, buf, size);
