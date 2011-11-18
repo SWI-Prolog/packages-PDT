@@ -27,7 +27,7 @@
 #include <string.h>
 #include <assert.h>
 
-#define ESC '\e'
+#define ESC 27		/* = '\e', but that is not supported in VC */
 
 typedef struct pdt_console
 { struct pdt_console   *next;
