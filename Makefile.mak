@@ -44,7 +44,7 @@ uninstall::
 		$(MAKEINDEX)
 
 html-install::
-		copy pdt.html "$(PKGDOC)"
+		-copy pdt.html "$(PKGDOC)"
 
 xpce-install::
 
