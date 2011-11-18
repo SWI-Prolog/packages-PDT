@@ -27,6 +27,8 @@
 #include <string.h>
 #include <assert.h>
 
+#define ESC 'S'
+
 typedef struct pdt_console
 { struct pdt_console   *next;
   void *		input_handle;
@@ -105,7 +107,7 @@ pdt_read(void *handle, char *buf, size_t size)
        PL_ttymode(Suser_input) == PL_RAWTTY  &&
        (out = Suser_output) )
   { ssize_t rc;
-    static char *go_single = "\es";
+    static char go_single[] = {ESC, 's'};
 
     if ( (*c->output_functions.write)(out->handle, go_single, 2) == 2 )
     { rc = (*c->input_functions.read)(handle, buf, 2);
@@ -129,7 +131,7 @@ pdt_write(void *handle, char *buf, size_t size)
   { char *em;
     ssize_t rc;
 
-    for(em=buf; *em != '\e' && em < e; em++)
+    for(em=buf; *em != ESC && em < e; em++)
       ;
     rc = (*c->output_functions.write)(handle, buf, em-buf);
     if ( rc < 0 )
@@ -138,8 +140,11 @@ pdt_write(void *handle, char *buf, size_t size)
     if ( rc != (em-buf) )
       return written;
     if ( em != e )
-    { if ( (*c->output_functions.write)(handle, "\e", 1) < 0 )
+    { static char esc[2] = {ESC,ESC};
+
+      if ( (*c->output_functions.write)(handle, esc, 2) != 2 )
 	return -1;
+      em++;
     }
     buf = em;
   }
