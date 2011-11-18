@@ -49,4 +49,5 @@
 pdt_install_console :-
 	pdt_wrap_console,
 	set_stream(user_input, tty(true)),
-	set_stream(user_output, tty(true)).
+	set_stream(user_output, tty(true)),
+	set_prolog_flag(tty_control, true).
