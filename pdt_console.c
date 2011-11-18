@@ -35,6 +35,8 @@ typedef struct pdt_console
   void *		output_handle;
   IOFUNCTIONS	        input_functions;
   IOFUNCTIONS	        output_functions;
+  IOFUNCTIONS	       *org_input_functions;
+  IOFUNCTIONS	       *org_output_functions;
   int			closed;
 } pdt_console;
 
@@ -52,12 +54,14 @@ find_console(void *input_handle, void *output_handle)
 
   if ( (c=malloc(sizeof(*c))) )
   { memset(c, 0, sizeof(*c));
-    c->input_handle     = input_handle;
-    c->output_handle    = output_handle;
-    c->input_functions  = *Suser_input->functions;
-    c->output_functions = *Suser_output->functions;
-    c->next             = consoles;
-    consoles            = c;
+    c->input_handle         = input_handle;
+    c->output_handle        = output_handle;
+    c->input_functions      = *Suser_input->functions;
+    c->output_functions     = *Suser_output->functions;
+    c->org_input_functions  = Suser_input->functions;
+    c->org_output_functions = Suser_output->functions;
+    c->next                 = consoles;
+    consoles                = c;
   }
 
   return c;
@@ -75,13 +79,13 @@ free_console(void *input_handle, void *output_handle)
     c = *pc;
 
     if ( input_handle && c->input_handle == input_handle )
-    { cf = c->input_functions.close;
+    { cf = c->org_input_functions->close;
       c->input_handle = NULL;
-      *Suser_input->functions = c->input_functions;
+      Suser_input->functions = c->org_input_functions;
     } else if ( output_handle && c->output_handle == output_handle )
-    { cf = c->output_functions.close;
+    { cf = c->org_output_functions->close;
       c->output_handle = NULL;
-      *Suser_input->functions = c->output_functions;
+      Suser_input->functions = c->org_output_functions;
     }
 
     if ( cf )
@@ -109,15 +113,15 @@ pdt_read(void *handle, char *buf, size_t size)
   { ssize_t rc;
     static char go_single[] = {ESC, 's'};
 
-    if ( (*c->output_functions.write)(out->handle, go_single, 2) == 2 )
-    { rc = (*c->input_functions.read)(handle, buf, 2);
+    if ( (*c->org_output_functions->write)(out->handle, go_single, 2) == 2 )
+    { rc = (*c->org_input_functions->read)(handle, buf, 2);
       if ( rc == 2 )
 	rc = 1;				/* drop \n */
       return rc;
     }
   }
 
-  return (*c->input_functions.read)(handle, buf, size);
+  return (*c->org_input_functions->read)(handle, buf, size);
 }
 
 
@@ -133,7 +137,7 @@ pdt_write(void *handle, char *buf, size_t size)
 
     for(em=buf; *em != ESC && em < e; em++)
       ;
-    rc = (*c->output_functions.write)(handle, buf, em-buf);
+    rc = (*c->org_output_functions->write)(handle, buf, em-buf);
     if ( rc < 0 )
       return rc;
     written += (em-buf);
@@ -142,7 +146,7 @@ pdt_write(void *handle, char *buf, size_t size)
     if ( em != e )
     { static char esc[2] = {ESC,ESC};
 
-      if ( (*c->output_functions.write)(handle, esc, 2) != 2 )
+      if ( (*c->org_output_functions->write)(handle, esc, 2) != 2 )
 	return -1;
       em++;
     }
@@ -183,10 +187,13 @@ pdt_install_console()
   { pdt_console *c;
 
     assert(in->functions->read != pdt_read);
+    assert(out->functions->write != pdt_write);
 
     if ( (c=find_console(in->handle, out->handle)) )
-    { in->functions->read  = pdt_read;
+    { in->functions = &c->input_functions;
+      in->functions->read  = pdt_read;
       in->functions->close = pdt_close_in;
+      out->functions = &c->output_functions;
       out->functions->write = pdt_write;
       out->functions->close = pdt_close_out;
     }
