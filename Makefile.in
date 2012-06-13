@@ -21,7 +21,7 @@ PDTOBJ=		pdt_console.o
 all:		$(TARGETS)
 
 pdt_console.@SO@:	$(PDTOBJ)
-		$(LD) $(LDSOFLAGS) -o $@ $(PDTOBJ) @LIBS@
+		$(LD) $(LDSOFLAGS) -o $@ $(PDTOBJ) @LIBS@ $(LIBPLSO)
 
 install:	$(TARGETS) $(LIBPL)
 		mkdir -p $(DESTDIR)$(SOLIBDIR)
