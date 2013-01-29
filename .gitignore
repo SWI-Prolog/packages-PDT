@@ -21,6 +21,7 @@
 *.blg
 *.manifest
 *~
+*.dSYM
 TAGS
 Makefile
 autom4te.cache/
