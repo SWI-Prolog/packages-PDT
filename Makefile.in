@@ -12,6 +12,7 @@
 PACKAGE=pdt
 DOC=pdt
 include ../Makefile.defs
+CFLAGS+= -I.
 
 LIBPL=		pdt_console.pl
 TARGETS=	pdt_console.@SO@
