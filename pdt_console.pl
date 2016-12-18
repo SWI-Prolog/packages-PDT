@@ -33,26 +33,26 @@
 */
 
 :- module(pdt_console,
-	  [ pdt_install_console/0
-	  ]).
+          [ pdt_install_console/0
+          ]).
 :- use_foreign_library(foreign(pdt_console)).
 
-%%	pdt_install_console
+%!  pdt_install_console
 %
-%	Support  get_single_char/1  in  PDT    console.  This  predicate
-%	modifies =user_input= and =user_output= as follows:
+%   Support  get_single_char/1  in  PDT    console.  This  predicate
+%   modifies =user_input= and =user_output= as follows:
 %
-%	  - If single-char mode is enabled, write "ESC s" over the user
-%	    output and then wait for two characters, returning the
-%	    first.
-%	  - Output is changed to emit ESC as ESC ESC.
+%     - If single-char mode is enabled, write "ESC s" over the user
+%       output and then wait for two characters, returning the
+%       first.
+%     - Output is changed to emit ESC as ESC ESC.
 %
-%	This protocol was  designed  for  PDT   by  Lukas  Degener.  The
-%	original implementation was partly in Prolog.   This is a full C
-%	implementation, both for speed.
+%   This protocol was  designed  for  PDT   by  Lukas  Degener.  The
+%   original implementation was partly in Prolog.   This is a full C
+%   implementation, both for speed.
 
 pdt_install_console :-
-	pdt_wrap_console,
-	set_stream(user_input, tty(true)),
-	set_stream(user_output, tty(true)),
-	set_prolog_flag(tty_control, true).
+    pdt_wrap_console,
+    set_stream(user_input, tty(true)),
+    set_stream(user_output, tty(true)),
+    set_prolog_flag(tty_control, true).
