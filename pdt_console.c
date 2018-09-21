@@ -32,7 +32,6 @@
     POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include <config.h>
 #include <SWI-Stream.h>
 #include <SWI-Prolog.h>
 #include <string.h>
